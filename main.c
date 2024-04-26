@@ -11,6 +11,9 @@ int main ( int argc, char ** argv ) {
     int status;
     char * line;
     do {
+        char _workdir [100];
+        getcwd(_workdir, sizeof(_workdir));
+        printf("[osh %s]$ ", _workdir);
         line = shell_get_line();
         status = shell_execute_commands(line);
         free(line);

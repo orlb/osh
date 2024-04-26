@@ -1,4 +1,5 @@
 #include "shell.h"
+#include <unistd.h>
 
 struct _Token_List {
     // invariant: last element of tokens is NULL
@@ -98,6 +99,9 @@ static const int _execute_command (const char * command, const char operator) {
         printf(__help_message);
         return __command_success;
     }
+    else if ( strcmp(_program, "cd") == 0 ) {
+        if ( chdir(_args[1]) != 0) perror(__message_prefix);
+    }
     else {
         int _status;
         pid_t _pid = fork();
@@ -132,7 +136,6 @@ static const int _execute_command (const char * command, const char operator) {
 char * shell_get_line () {
     char * line = malloc(100 * sizeof(char));
     size_t _size = 100;
-    printf(__prompt_string);
     if ( fgets(line, _size, stdin) == NULL ) {
         // https://cboard.cprogramming.com/c-programming/65783-resetting-stdin-after-eof.html
         // reopen stdin when EOF received

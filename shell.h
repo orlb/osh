@@ -1,13 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/wait.h> // waitpid
-#include <unistd.h> // size_t
+#include <unistd.h> // size_t, chdir, getcwd
 #include <string.h> // strtok, printf, strdup, strcmp, strcpy
 #include <ctype.h>
 
-#define __prompt_string     "[osh]$ "
 #define __message_prefix    "-osh: "
-#define __help_message      "You are running osh.\n"
+#define __help_message      \
+    "osh, Orlandis Brown 2024\n" \
+    "These shell commands are defined internally.\n" \
+    "\n" \
+    "help       - Show this list\n" \
+    "cd [dir]   - Change working directory to dir\n" \
+    "exit       - Leave the shell\n"
 
 #define __token_group_delim ";"
 #define __command_delim     "&"
