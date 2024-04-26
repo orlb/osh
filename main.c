@@ -2,6 +2,7 @@
 // Shell for Linux systems, written in C
 //
 // Orlandis Brown
+// olbrown3@alaska.edu
 // CS321
 // April 26 2024
 

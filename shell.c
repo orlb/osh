@@ -81,11 +81,25 @@ static const char _get_command_operator (const char * command, const char * toke
     }
 }
 
+static const int _string_is_empty (const char * string) {
+    while ( 1 ) {
+        while ( *string != '\0' ) { // check if empty
+            if ( ! isspace((unsigned char) *string) ) {
+                return 0;
+            }
+            else {
+                string++;
+            }
+        }
+        return 1;
+    }
+}
+
 static const int _execute_command (const char * command, const char operator) {
     // get command args and run builtin commands
     // otherwise execute in foreground or background
     // depending on operator
-    if ( command == NULL ) {
+    if ( command == NULL || _string_is_empty(command) ) {
         return __command_success;
     }
     _Token_List * _command_tl = _get_token_list(command, __args_delim);
@@ -101,6 +115,11 @@ static const int _execute_command (const char * command, const char operator) {
     }
     else if ( strcmp(_program, "cd") == 0 ) {
         if ( chdir(_args[1]) != 0) perror(__message_prefix);
+        return __command_success;
+    }
+    else if ( strcmp(_program, "print") == 0 ) {
+        printf("%d\n", getpid());
+        return __command_success;
     }
     else {
         int _status;
@@ -134,36 +153,30 @@ static const int _execute_command (const char * command, const char operator) {
 }
 
 char * shell_get_line () {
-    char * line = malloc(100 * sizeof(char));
-    size_t _size = 100;
+    char * line = malloc(1024 * sizeof(char));
+    size_t _size = 1024;
     if ( fgets(line, _size, stdin) == NULL ) {
         // https://cboard.cprogramming.com/c-programming/65783-resetting-stdin-after-eof.html
         // reopen stdin when EOF received
         // Not sure how else to handle without exiting
         freopen("/dev/tty", "rw", stdin);
         printf("\n");
+        free(line);
         return NULL;
     }
-    while (*line != '\0') { // check if empty
-        if ( ! isspace((unsigned char) *line) ) {
-            // This if statement results in 'free(): Invalid pointer', even when the condition is false.
-            // Really not sure why
-            // if (  strlen(line) > 101 ) {
-            //     fprintf(stderr,
-            //         "%sCommand too long, must be shorter than 100 characters. Truncating.\n",
-            //         __message_prefix);
-            //     _size = 101; // 100 + null byte
-            //     char * _line = malloc(_size * sizeof(char));
-            //     strncpy(_line, line, _size);
-            //     free(line);
-            //     line = _line;
-            // }
-            return line;
+    if ( ! _string_is_empty(line) ) {
+        if (  strlen(line) > 101 ) {
+            printf("%sCommand too long, must be shorter than 100 characters. Truncating.\n",
+                __message_prefix);
+            _size = 101; // 100 + null byte
+            char * _line = malloc(_size * sizeof(char));
+            strncpy(_line, line, _size);
+            free(line);
+            line = _line;
         }
-        else {
-            line++;
-        }
+        return line;
     }
+    free(line);
     return NULL;
 }
 
@@ -179,9 +192,11 @@ const int shell_execute_commands (const char * line) {
         _Token_List * commands = _get_token_list(_group, __command_delim);
         for ( int m = 0; m < commands->size; m++ ) {
             const char * _command = commands->tokens[m];
-            if ( _command != NULL ) {
+            if ( _command != NULL) {
                 const char _operator = _get_command_operator(_command, _group, m);
                 if ( _execute_command(_command, _operator) == __command_quit) {
+                    _destroy_token_list(commands);
+                    _destroy_token_list(token_groups);
                     return __command_quit;
                 }
             }

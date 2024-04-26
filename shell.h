@@ -7,12 +7,15 @@
 
 #define __message_prefix    "-osh: "
 #define __help_message      \
+    "\n" \
     "osh, Orlandis Brown 2024\n" \
     "These shell commands are defined internally.\n" \
     "\n" \
     "help       - Show this list\n" \
+    "print      - Print shell pid\n" \
     "cd [dir]   - Change working directory to dir\n" \
-    "exit       - Leave the shell\n"
+    "exit       - Leave the shell\n" \
+    "\n"
 
 #define __token_group_delim ";"
 #define __command_delim     "&"
